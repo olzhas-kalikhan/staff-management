@@ -10,9 +10,6 @@
 *  Online (Heroku) Link: https://guarded-forest-30038.herokuapp.com/
 *
 ********************************************************************************/
-
-
-
 var express = require("express");
 var app = express();
 var path = require("path");
