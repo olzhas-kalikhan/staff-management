@@ -1,0 +1,12 @@
+body{
+    
+    background: rgb(255,255,255);
+    background: linear-gradient(30deg, rgba(160,130,180,0.4) 0%, rgba(135, 135, 212, 0.4) 40%, rgba(186, 241, 255, 0.671) 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+p{
+    font-family: Verdana;
+    font-weight: 500;
+}
