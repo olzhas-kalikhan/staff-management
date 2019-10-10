@@ -1,5 +1,4 @@
 body{
-    
     background: rgb(255,255,255);
     background: linear-gradient(30deg, rgba(160,130,180,0.4) 0%, rgba(135, 135, 212, 0.4) 40%, rgba(186, 241, 255, 0.671) 100%);
     background-attachment: fixed;
@@ -9,4 +8,18 @@ body{
 p{
     font-family: Verdana;
     font-weight: 500;
+}
+article{
+    margin-right: 6%;
+    margin-left: 0%;
+}
+aside{
+    margin-right: -3%;
+}
+.container{
+    background: rgb(255,255,255, 0.8);
+    border-radius: 30px;
+    padding-top: 1%;
+    padding-left: 2%;
+    
 }

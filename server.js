@@ -38,10 +38,10 @@ handleResponse=(rs ,func)=>{
 }
 
 dataService.initialize().then(()=>{
-    
+    app.use(express.static('public')); 
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.listen(HTTP_PORT, onHttpStart);
-     app.use(express.static('public')); 
-     app.use(bodyParser.urlencoded({ extended: true }));
+     
 //send home page to the server
     app.get("/", (req,res)=>{
         res.sendFile(path.join(__dirname,"/views/home.html"));
@@ -100,6 +100,7 @@ dataService.initialize().then(()=>{
     app.get("*",(req,res)=>{
         res.status(404).send("<h1>Page not found</h1> <br> Status code: " + res.statusCode);
     })
+    
 })
 .catch((reason)=>{
     console.log(reason);
