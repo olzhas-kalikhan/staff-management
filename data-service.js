@@ -5,23 +5,27 @@
 *  from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
-*  Name: Olzhas Kalikhan Student ID: 102469186 Date: 10.10.2019
+*  Name: Olzhas Kalikhan Student ID: 102469186 Date: 11.10.2019
 *
-*  Online (Heroku) Link: https://guarded-forest-30038.herokuapp.com/
+*  Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
 *
-********************************************************************************/ 
+********************************************************************************/
 
 
 
 const fs = require("fs");
 
-let employees=[];
-let departments=[];
+var employees=[];
+var departments=[];
+var arrayPromise=(array, msg )=>{
+    return new Promise((resolve, reject)=>{
+        array.length>0?resolve(array):reject(`No ${msg} returned`);
+    })
+}
 
 module.exports.initialize=()=>{
     
     return new Promise((resolve, reject)=>{
-        
         fs.readFile('./data/employees.json', 'utf8', (err, dataEmp) =>	 {
             if (err) reject("unable to read file");
             else{
@@ -33,43 +37,19 @@ module.exports.initialize=()=>{
                         resolve();
                     }              
                 });
-            
             }                                     
         })
-        
     })        
-
-        
 }
 module.exports.getAllEmployees=()=>{
-    
-   return new Promise((resolve, reject)=>{
-       if (employees.length>0){         
-           resolve(employees);
-       }else{
-           reject("no return values");
-       }
-   })
+    return arrayPromise(employees, `employees`);
 }
 module.exports.getManagers=()=>{
-    
     var managers=employees.filter(x => x.isManager == true);
-    return new Promise((resolve, reject)=>{
-        if(managers.length>0){
-            resolve(managers);
-        }else{
-            reject("no managers returned");
-        }
-    })
+    return arrayPromise(managers, `managers`);
 }
 module.exports.getDepartments=()=>{
-    return new Promise((resolve, reject)=>{
-        if(departments.length>0){
-            resolve(departments);
-        }else{
-            reject("no return values");
-        }
-    })
+    return arrayPromise(departments, `managers`);
 }
 module.exports.addEmployee=(employeeData)=>{
     return new Promise((resolve, reject)=>{
@@ -77,53 +57,24 @@ module.exports.addEmployee=(employeeData)=>{
         if(employeeData.isManager == undefined){
             employeeData.isManager=false;
         }
-           
         employees.push(employeeData);
         resolve();
     })
 }
 module.exports.getEmployeesByStatus=(status)=>{
     let employeeByStatus=employees.filter(x=>x.status == status);
-    return new Promise((resolve,reject)=>{
-        if(employeeByStatus.length<=0){
-            reject("No employees with requested status");
-        }
-        else{
-            resolve(employeeByStatus);
-        }
-    })    
+    return arrayPromise(employeeByStatus, `employees with status ${status}`);
 }
 module.exports.getEmployeesByDepartment=(department)=>{
     let empByDep = employees.filter(x=>x.department== department);
-    return new Promise((resolve, reject)=>{
-        if(empByDep.length<=0){
-            reject("No employees with requested department");
-        }
-        else{
-            resolve(empByDep);
-        }
-    })
+    return arrayPromise(empByDep, `employees with deparment number ${department}`);
 }
 module.exports.getEmployeesByManager=(managerNum)=>{
     let empByManager=employees.filter(x=>x.employeeManagerNum == managerNum);
-    return new Promise((resolve, reject)=>{
-        if(empByManager.length<=0){
-            reject("No employees with requested manager number");
-        }
-        else{
-            resolve(empByManager);
-        }
-    })
+    return arrayPromise(empByManager, `managers with managerNum ${managerNum}`);
 }
 module.exports.getEmployeeByNum=(num)=>{
     let empByNum=employees.filter(x=>x.employeeNum == num);
-    return new Promise((resolve, reject)=>{
-        if(empByNum.length<=0){
-            reject("No employees with requested number");
-        }
-        else{
-            resolve(empByNum);
-        }
-    })
+    return arrayPromise(empByNum, `employees with number ${num}`);
 }
 
