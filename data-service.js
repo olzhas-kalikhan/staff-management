@@ -75,6 +75,20 @@ module.exports.getEmployeesByManager=(managerNum)=>{
 }
 module.exports.getEmployeeByNum=(num)=>{
     let empByNum=employees.filter(x=>x.employeeNum == num);
-    return arrayPromise(empByNum, `employees with number ${num}`);
+    
+    return new Promise((resolve, reject)=>{
+        empByNum.length>0 ?resolve(empByNum[0]):reject(`No employees with number ${num} returned`);
+    })
 }
+
+
+module.exports.updateEmployee=(employeeData)=>{
+    let emp = employees.find(e=>  e.employeeNum == employeeData.employeeNum);
+    return new Promise((resolve, reject)=>{
+        if(emp.employeeNum>0){
+            employees[emp.employeeNum-1] = Object.assign({}, employeeData);
+            resolve();
+        }
+    })
+} 
 
