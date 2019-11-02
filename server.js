@@ -5,7 +5,7 @@
 *  from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
-*  Name: Olzhas Kalikhan Student ID: 102469186 Date: 11.10.2019
+*  Name: Olzhas Kalikhan Student ID: 102469186 Date: 01.11.2019
 *
 *  Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
 *
