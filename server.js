@@ -39,8 +39,14 @@ handleResponse=(response ,promise)=>{
 }
 //assignment 4 update
 handleEmployees=(response, promise)=>{
-    promise.then((result)=>response.render("employees", { employees : result }))
-           .catch((result)=>response.render("employees",{ message: result }));
+    promise.then((result)=>{
+        if(result.length>0)
+            response.render("employees", { employees : result })
+        else
+            response.render("employees",{ message:"no results returned" })
+    })
+    .catch(()=>res.status(500).send("Employee not Found"));
+           
 }
 
 dataService.initialize().then(()=>{
@@ -81,18 +87,18 @@ dataService.initialize().then(()=>{
     app.get("/about", (req,res)=>{
         res.render('about');
     });    
-    app.get("/employees/add",(req,res)=>{
-        res.render('addEmployee');
-    });
-    //assignment 4 update
+    
     app.get("/departments",(req,res)=>{
-        dataService.getDepartments().then((result)=>res.render("departments",{departments:result}))
-                                    .catch((result)=>res.render("departments", {department:result}));
+        dataService.getDepartments().then((result)=>{
+            if(result.length>0)
+                res.render("departments",{ departments : result});
+            else    
+                res.render("departments", {message:"no results returned"});
+        })
     });
     app.get("/images/add", (req,res)=>{
         res.render('addImage');
     });
-    //assignment 4 update
     app.get("/images",(req,res)=>{
         //save the list of filenames in folder uploaded to array items 
         fs.readdir("./public/images/uploaded", (err, items)=>{
@@ -104,12 +110,20 @@ dataService.initialize().then(()=>{
     app.post("/images/add", upload.single("imageFile"), (req, res)=>{ //upload image on post request
         res.redirect("/images");//redirect to images route on response
     });
+    app.get("/employees/add",(req,res)=>{
+        dataService.getDepartments().then((result)=>res.render('addEmployee', {departments: result}))
+                                    .catch(()=>res.render('addEmployee',{departments: []}));
+        
+    });
     app.post("/employees/add",(req,res)=>{
-        dataService.addEmployee(req.body).then(()=>{res.redirect("/employees")});
+        dataService.addEmployee(req.body).then(()=>res.redirect("/employees"))
+                                         .catch(()=>res.status(500).send("Unable to Add Employee"));
+      
     })
     //assignment 4 update
     app.post("/employee/update", (req, res) => {
-        dataService.updateEmployee(req.body).then(res.redirect("/employees"));
+        dataService.updateEmployee(req.body).then(res.redirect("/employees"))
+                                            .catch(()=>res.status(500).send("Unable to Add Employee"));
     });
     
     app.get("/employees", (req,res)=>{    
@@ -127,10 +141,67 @@ dataService.initialize().then(()=>{
         }        
     });
     //assignment 4 update
-    app.get("/employee/:empNum", (req,res)=>{  
-        dataService.getEmployeeByNum(req.params.empNum).then((result)=>res.render('employee', { employee : result }))
-                                                       .catch((result)=>res.render('employee',{ message : result})); 
+    app.get("/employee/:empNum", (req, res) => {
+
+        // initialize an empty object to store the values
+        let viewData = {};
+    
+        dataService.getEmployeeByNum(req.params.empNum).then((data) => {
+            if (data) {
+                viewData.employee = data; //store employee data in the "viewData" object as "employee"
+            } else {
+                viewData.employee = null; // set employee to null if none were returned
+            }
+        }).catch(() => {
+            viewData.employee = null; // set employee to null if there was an error 
+        }).then(dataService.getDepartments)
+        .then((data) => {
+            viewData.departments = data; // store department data in the "viewData" object as "departments"
+    
+            // loop through viewData.departments and once we have found the departmentId that matches
+            // the employee's "department" value, add a "selected" property to the matching 
+            // viewData.departments object
+    
+            for (let i = 0; i < viewData.departments.length; i++) {
+                if (viewData.departments[i].departmentId == viewData.employee.department) {
+                    viewData.departments[i].selected = true;
+                }
+            }
+    
+        }).catch(() => {
+            viewData.departments = []; // set departments to empty if there was an error
+        }).then(() => {
+            if (viewData.employee == null) { // if no employee - return an error
+                res.status(404).send("Employee Not Found");
+            } else {
+                res.render("employee", { viewData: viewData }); // render the "employee" view
+            }
+        });
     });
+    
+    app.get("/departments/add",(req, res)=>{
+        res.render('addDepartment');
+    })
+    app.post("/departments/add", (req, res)=>{
+        dataService.addDepartment(req.body).then(()=>{ res.redirect("/departments")})
+                                           .catch(()=>res.status(500).send("Unable to Add Employee"));
+    })
+    app.post("/department/update", (req,res)=>{
+        dataService.updateDepartment(req.body).then(()=>{res.redirect("/departments")})
+                                              .catch(()=>res.status(500).send("Unable to Add Employee"));
+    })
+    app.get("/department/:departmentId", (req, res)=>{
+        dataService.getDepartmentById(req.params.departmentId).then((result)=>res.render('department', { employee : result }))
+                                                              .catch((result)=>res.status(404).send("Department Not Found")); 
+    })
+    app.get("/departments/delete/:departmentId", (req,res)=>{
+        dataService.deleteDepartmentById(req.params.departmentId).then(()=>{res.redirect("/departments")})
+                                                                 .catch(()=>res.status(500).send("Unable to Remove Department / Department not found)"  ))
+    })
+    app.get("/employees/delete/:empNum", (req,res)=>{
+        dataService.deleteEmployeeByNum(req.params.empNum).then(()=>res.redirect("/employees"))
+                                                          .catch(()=>res.status(500).send("Unable to Remove Employee / Employee not found)"))
+    })
     app.get("*",(req,res)=>{
         res.status(404).send("<h1>Page not found</h1> <br> Status code: " + res.statusCode);
     })
