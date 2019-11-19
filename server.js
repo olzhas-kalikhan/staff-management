@@ -191,8 +191,8 @@ dataService.initialize().then(()=>{
                                               .catch(()=>res.status(500).send("Unable to Add Employee"));
     })
     app.get("/department/:departmentId", (req, res)=>{
-        dataService.getDepartmentById(req.params.departmentId).then((result)=>res.render('department', { employee : result }))
-                                                              .catch((result)=>res.status(404).send("Department Not Found")); 
+        dataService.getDepartmentById(req.params.departmentId).then((result)=>res.render('department', { department : result }))
+                                                              .catch(()=>res.status(404).send("Department Not Found")); 
     })
     app.get("/departments/delete/:departmentId", (req,res)=>{
         dataService.deleteDepartmentById(req.params.departmentId).then(()=>{res.redirect("/departments")})
