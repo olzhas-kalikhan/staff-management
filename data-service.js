@@ -1,13 +1,12 @@
 /*********************************************************************************
-*  WEB322 – Assignment 05
-*  I declare that this assignment is my own work with the exception of the parts provided to me by my professor 
-*  in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically
-*  from any other source 
-*  (including 3rd party web sites) or distributed to other students.
-* 
-*  Name: Olzhas Kalikhan Student ID: 102469186 Date: 15.11.2019
+* WEB322 – Assignment 06
+* I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part of this
+* assignment has been copied manually or electronically from any other source (including web sites) or
+* distributed to other students.
 *
-*  Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
+* Name: Olzhas Kalikhan Student ID: 102469186 Date: 29/11/2019
+*
+* Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
 *
 ********************************************************************************/
 
