@@ -1,13 +1,12 @@
 /*********************************************************************************
-*  WEB322 – Assignment 05
-*  I declare that this assignment is my own work with the exception of the parts provided to me by my professor 
-*  in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically
-*  from any other source 
-*  (including 3rd party web sites) or distributed to other students.
-* 
-*  Name: Olzhas Kalikhan Student ID: 102469186 Date: 15.11.2019
+* WEB322 – Assignment 06
+* I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part of this
+* assignment has been copied manually or electronically from any other source (including web sites) or
+* distributed to other students.
 *
-*  Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
+* Name: Olzhas Kalikhan Student ID: 102469186 Date: 29/11/2019
+*
+* Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
 *
 ********************************************************************************/
 var express = require("express");
@@ -18,6 +17,8 @@ var querystring = require("querystring");
 var exphbs = require('express-handlebars');
 var HTTP_PORT = process.env.PORT || 8080;
 var dataService = require('./data-service')
+var dataServiceAuth = require('./data-service-auth');
+var clientSessions = require('client-sessions');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const storage = multer.diskStorage({
@@ -48,8 +49,17 @@ handleEmployees=(response, promise)=>{
     .catch(()=>res.status(500).send("Employee not Found"));
            
 }
+function ensureLogin(req, res, next) {
+    if (!req.session.user) {
+      res.redirect("/login");
+    } else {
+      next();
+    }
+}
 
-dataService.initialize().then(()=>{
+dataService.initialize()
+.then(dataServiceAuth.initialize())
+.then(()=>{
     app.use(express.static('public')); 
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(function(req,res,next){
@@ -79,6 +89,19 @@ dataService.initialize().then(()=>{
                                 
     }));
     app.set("view engine", ".hbs");
+
+    app.use(clientSessions({
+        cookieName: "session", 
+        secret: "aB+x@+@PZtNn8!#q",
+        duration: 2 * 60 * 1000, 
+        activeDuration: 1000 * 60 
+    }));
+    app.use(function(req, res, next) {
+        res.locals.session = req.session;
+        next();
+    });
+    
+
     app.listen(HTTP_PORT, onHttpStart);
     
     app.get("/", (req,res)=>{
@@ -88,7 +111,7 @@ dataService.initialize().then(()=>{
         res.render('about');
     });    
     
-    app.get("/departments",(req,res)=>{
+    app.get("/departments", ensureLogin, (req,res)=>{
         dataService.getDepartments().then((result)=>{
             if(result.length>0)
                 res.render("departments",{ departments : result});
@@ -96,10 +119,10 @@ dataService.initialize().then(()=>{
                 res.render("departments", {message:"no results returned"});
         })
     });
-    app.get("/images/add", (req,res)=>{
+    app.get("/images/add", ensureLogin, (req,res)=>{
         res.render('addImage');
     });
-    app.get("/images",(req,res)=>{
+    app.get("/images", ensureLogin, (req,res)=>{
         //save the list of filenames in folder uploaded to array items 
         fs.readdir("./public/images/uploaded", (err, items)=>{
             res.render('images', {
@@ -107,26 +130,26 @@ dataService.initialize().then(()=>{
             });
         })
     });
-    app.post("/images/add", upload.single("imageFile"), (req, res)=>{ //upload image on post request
+    app.post("/images/add", ensureLogin, upload.single("imageFile"), (req, res)=>{ //upload image on post request
         res.redirect("/images");//redirect to images route on response
     });
-    app.get("/employees/add",(req,res)=>{
+    app.get("/employees/add", ensureLogin, (req,res)=>{
         dataService.getDepartments().then((result)=>res.render('addEmployee', {departments: result}))
                                     .catch(()=>res.render('addEmployee',{departments: []}));
         
     });
-    app.post("/employees/add",(req,res)=>{
+    app.post("/employees/add", ensureLogin, (req,res)=>{
         dataService.addEmployee(req.body).then(()=>res.redirect("/employees"))
                                          .catch(()=>res.status(500).send("Unable to Add Employee"));
       
     })
     //assignment 4 update
-    app.post("/employee/update", (req, res) => {
+    app.post("/employee/update", ensureLogin, (req, res) => {
         dataService.updateEmployee(req.body).then(res.redirect("/employees"))
                                             .catch(()=>res.status(500).send("Unable to Add Employee"));
     });
     
-    app.get("/employees", (req,res)=>{    
+    app.get("/employees", ensureLogin, (req,res)=>{    
         if(req.query.status){
             handleEmployees( res, dataService.getEmployeesByStatus(req.query.status));//==>line 40  
         }
@@ -141,7 +164,7 @@ dataService.initialize().then(()=>{
         }        
     });
     //assignment 4 update
-    app.get("/employee/:empNum", (req, res) => {
+    app.get("/employee/:empNum", ensureLogin, (req, res) => {
 
         // initialize an empty object to store the values
         let viewData = {};
@@ -179,29 +202,64 @@ dataService.initialize().then(()=>{
         });
     });
     
-    app.get("/departments/add",(req, res)=>{
+    app.get("/departments/add", ensureLogin, (req, res)=>{
         res.render('addDepartment');
     })
-    app.post("/departments/add", (req, res)=>{
+    app.post("/departments/add", ensureLogin, (req, res)=>{
         dataService.addDepartment(req.body).then(()=>{ res.redirect("/departments")})
                                            .catch(()=>res.status(500).send("Unable to Add Employee"));
     })
-    app.post("/department/update", (req,res)=>{
+    app.post("/department/update", ensureLogin, (req,res)=>{
         dataService.updateDepartment(req.body).then(()=>{res.redirect("/departments")})
                                               .catch(()=>res.status(500).send("Unable to Add Employee"));
     })
-    app.get("/department/:departmentId", (req, res)=>{
+    app.get("/department/:departmentId", ensureLogin, (req, res)=>{
         dataService.getDepartmentById(req.params.departmentId).then((result)=>res.render('department', { department : result }))
                                                               .catch(()=>res.status(404).send("Department Not Found")); 
     })
-    app.get("/departments/delete/:departmentId", (req,res)=>{
+    app.get("/departments/delete/:departmentId", ensureLogin, (req,res)=>{
         dataService.deleteDepartmentById(req.params.departmentId).then(()=>{res.redirect("/departments")})
                                                                  .catch(()=>res.status(500).send("Unable to Remove Department / Department not found)"  ))
     })
-    app.get("/employees/delete/:empNum", (req,res)=>{
+    app.get("/employees/delete/:empNum", ensureLogin, (req,res)=>{
         dataService.deleteEmployeeByNum(req.params.empNum).then(()=>res.redirect("/employees"))
                                                           .catch(()=>res.status(500).send("Unable to Remove Employee / Employee not found)"))
     })
+    //a6
+    app.get("/login", (req,res)=>{
+        res.render('login');
+    });
+    app.get("/register", (req,res)=>{
+        res.render('register');
+    });
+    app.post("/register", (req,res)=>{
+        dataServiceAuth.registerUser(req.body)
+        .then(()=>res.render('register', {successMessage: "User created"}))
+        .catch((err)=>res.render('register',{errorMessage: err, userName: req.body.userName}));
+    });
+    app.post("/login", (req,res)=>{
+        req.body.userAgent = req.get('User-Agent');
+        dataServiceAuth.checkUser(req.body).then((user) => {
+            req.session.user = {
+                userName: user.userName,
+                email: user.email,
+                loginHistory: user.loginHistory
+            }
+            res.redirect('/employees');
+        })
+        .catch((err)=>{
+            res.render('login', {errorMessage: err, userName: req.body.userName});
+        })
+           
+    });
+    app.get("/logout", (req,res)=>{
+        req.session.reset();
+        res.redirect('/');
+    });
+    app.get("/userHistory", ensureLogin, (req,res)=>{
+        res.render('userHistory');
+    });
+
     app.get("*",(req,res)=>{
         res.status(404).send("<h1>Page not found</h1> <br> Status code: " + res.statusCode);
     })

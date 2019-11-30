@@ -11,6 +11,8 @@
 *
 ********************************************************************************/
 
+
+
 const Sequelize = require('sequelize');
 var sequelize = new Sequelize('dbekqhmdjnh5lm', 'aurfisfykqgknl', 'fa8bc04a18644b408721d564bdb32bbfb3b40ceda20693722844ac544a187a38', {
     host: 'ec2-54-83-33-14.compute-1.amazonaws.com',
