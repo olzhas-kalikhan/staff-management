@@ -1,14 +1,7 @@
-/*********************************************************************************
-* WEB322 – Assignment 06
-* I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part of this
-* assignment has been copied manually or electronically from any other source (including web sites) or
-* distributed to other students.
-*
-* Name: Olzhas Kalikhan Student ID: 102469186 Date: 29/11/2019
-*
-* Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
-*
-********************************************************************************/
+/*
+Name: Olzhas Kalikhan Date: 29/11/2019
+Online (Heroku) Link: https://infinite-waters-33512.herokuapp.com/
+*/
 
 var mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
